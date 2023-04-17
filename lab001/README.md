@@ -355,3 +355,12 @@ trace to 192.168.3.3, 8 hops max, press Ctrl+C to stop
  1   192.168.4.1   1.063 ms  0.993 ms  0.741 ms
  2   *192.168.3.3   2.304 ms (ICMP type:3, code:3, Destination port unreachable)
 ```
+
+### Добавлено (исправление от 17.04.2023)
+
+Создание vlan interface и vlan native на роутере R1:
+
+```
+int eth 0/1.8
+encapsulation dot1Q 8 native
+```
