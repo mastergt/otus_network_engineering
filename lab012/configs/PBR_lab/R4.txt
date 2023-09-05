@@ -1,0 +1,15 @@
+hostname R4
+!
+ip domain name www
+!
+ip ssh version 2
+!
+interface Ethernet0/0
+ ip address 10.3.3.2 255.255.255.0
+!
+ip route 0.0.0.0 0.0.0.0 10.3.3.1
+!
+line vty 0 4
+ login local
+ transport input all
+!

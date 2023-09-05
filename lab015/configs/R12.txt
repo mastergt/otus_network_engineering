@@ -1,0 +1,129 @@
+
+!
+! Last configuration change at 13:42:10 MSK Tue Sep 5 2023
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+service compress-config
+!
+hostname R12
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+clock timezone MSK 3 0
+!
+!
+!
+!
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+spanning-tree vlan 100,200 priority 24576
+!
+vlan internal allocation policy ascending
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ no shutdown
+ switchport trunk allowed vlan 100,200
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+!
+interface Ethernet0/1
+ no shutdown
+ switchport trunk allowed vlan 100,200
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+!
+interface Ethernet0/2
+ no shutdown
+ no switchport
+ ip address 10.0.1.133 255.255.255.252
+ duplex auto
+!
+interface Ethernet0/3
+ no shutdown
+ no switchport
+ ip address 10.0.1.149 255.255.255.252
+ duplex auto
+!
+interface Ethernet1/0
+ no shutdown
+!
+interface Ethernet1/1
+ no shutdown
+!
+interface Ethernet1/2
+ no shutdown
+!
+interface Ethernet1/3
+ no shutdown
+!
+interface Vlan100
+ no shutdown
+ ip address 192.168.1.2 255.255.255.0
+ vrrp 1 ip 192.168.1.1
+ vrrp 1 priority 150
+!
+interface Vlan200
+ no shutdown
+ ip address 10.0.2.2 255.255.255.128
+ vrrp 2 ip 10.0.2.1
+!
+router ospf 1
+ router-id 10.0.1.133
+ area 10 nssa
+ passive-interface default
+ no passive-interface Ethernet0/2
+ no passive-interface Ethernet0/3
+ no passive-interface Vlan200
+ network 10.0.1.132 0.0.0.3 area 10
+ network 10.0.1.148 0.0.0.3 area 10
+ network 10.0.2.0 0.0.0.127 area 10
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ logging synchronous
+line aux 0
+line vty 0 4
+!
+!
+end
