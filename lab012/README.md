@@ -129,7 +129,7 @@ L        192.168.28.1/32 is directly connected, Ethernet0/2.100
 Т. е. default gateway - присутствует. 
 также, для обеспечения связности, Сети Чокурдах и Лабутнаги были добавлены в iBGP на R25 и R26.
 
-#### распределение трафика между двумя линками с провайдером.
+#### распределение трафика между двумя линками с провайдером. v1 (ospf based)
 
 на роутере R28 включаем ECMP:
 ```
@@ -177,6 +177,105 @@ L        192.168.28.1/32 is directly connected, Ethernet0/2.100
 ```
 
  Видим, что для маршрута по умолчанию включился механизм ECMP и трафик будет распределяться по двум линкам. Задача выполнена.
+
+#### распределение трафика между двумя линками с провайдером. v2 (PBR based)
+
+Итак, теперь настроим балансировку трафика с помощью политик.
+На роутере R28 создалдим правило:
+```
+route-map balancer permit 10
+ match ip address odd
+ set ip next-hop verify-availability 172.16.0.37 1 track 1
+!
+route-map balancer permit 20
+ match ip address even
+ set ip next-hop verify-availability 172.16.0.33 2 track 2
+```
+
+Тут мы указали, что для четных IP направлять трафик по одному пути, для нечетных - по другому. Но это не всё!
+Также нужно создать и соответствующие acces lists:
+```
+ip access-list standard even
+ permit 192.168.28.0 0.0.0.254
+ip access-list standard odd
+ permit 192.168.28.1 0.0.0.254
+```
+
+Далее. На случай, если у нас 1 провайдер "упадёт" - нужно оставшийся трафик перенаправлять на рабочий. Для этого создадим правила SLA,  с помощью которых будем отслеживать состояния вышестоящих IP (gateways):
+
+```
+ip sla 2
+ icmp-echo 172.16.0.37 source-interface Ethernet0/0
+ frequency 5
+ip sla schedule 2 life forever start-time now
+ip sla 3
+ icmp-echo 172.16.0.33 source-interface Ethernet0/1
+ frequency 5
+ip sla schedule 3 life forever start-time now
+
+track 1 ip sla 2 reachability
+ delay down 10 up 5
+!
+track 2 ip sla 3 reachability
+ delay down 10 up 5
+
+``` 
+также добавим маршруты:
+
+```
+ip route 0.0.0.0 0.0.0.0 172.16.0.37 track 1
+ip route 0.0.0.0 0.0.0.0 172.16.0.33 track 2
+```
+
+Смотрим на состояние политики:
+
+```
+R28#sho route-map balancer
+route-map balancer, permit, sequence 10
+  Match clauses:
+    ip address (access-lists): odd 
+  Set clauses:
+    ip next-hop verify-availability 172.16.0.37 1 track 1  [up]
+  Policy routing matches: 10 packets, 980 bytes
+route-map balancer, permit, sequence 20
+  Match clauses:
+    ip address (access-lists): even 
+  Set clauses:
+    ip next-hop verify-availability 172.16.0.33 2 track 2  [up]
+  Policy routing matches: 0 packets, 0 bytes
+
+```
+
+Видим, что SLA работает, оба провадера в состоянии UP.
+
+Теперь проверяем работу нашего балансера:
+Идём на узел VCP30 и запускаем:
+```
+VPC30> trace 192.168.1.6
+trace to 192.168.1.6, 8 hops max, press Ctrl+C to stop
+ 1   192.168.28.1   0.238 ms  0.284 ms  0.252 ms
+ 2   172.16.0.37   0.395 ms  0.304 ms  0.354 ms
+ 3   10.5.2.57   0.403 ms  0.347 ms  0.331 ms
+ 4   10.5.2.53   0.455 ms  0.407 ms  0.337 ms
+ 5   172.16.0.5   0.552 ms  0.492 ms  0.529 ms
+ 6   172.16.0.1   0.640 ms  0.570 ms  0.583 ms
+ 7   10.0.1.133   0.723 ms  0.694 ms  0.691 ms
+ 8   *192.168.1.6   2.191 ms (ICMP type:3, code:3, Destination port unreachable)
+```
+
+```
+VPC30> trace 192.168.1.6
+trace to 192.168.1.6, 8 hops max, press Ctrl+C to stop
+ 1   192.168.28.1   0.238 ms  0.284 ms  0.252 ms
+ 2   172.16.0.37   0.395 ms  0.304 ms  0.354 ms
+ 3   10.5.2.57   0.403 ms  0.347 ms  0.331 ms
+ 4   10.5.2.53   0.455 ms  0.407 ms  0.337 ms
+ 5   172.16.0.5   0.552 ms  0.492 ms  0.529 ms
+ 6   172.16.0.1   0.640 ms  0.570 ms  0.583 ms
+ 7   10.0.1.133   0.723 ms  0.694 ms  0.691 ms
+ 8   *192.168.1.6   2.191 ms (ICMP type:3, code:3, Destination port unreachable)
+```
+Видим, что на разные узлы (четные, нечетные) трафик ходит по разным путям. Задача - выполнена.
 
 #### Настроика отслеживания линка через технологию IP SLA
   
