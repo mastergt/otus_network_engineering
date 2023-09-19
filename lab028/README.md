@@ -101,6 +101,19 @@ router bgp 2042
   neighbor 172.16.0.25 filter-list 1 out
 ```
 т. е. теперь из офиса Питера мы анонсим только свои сети, поэтому транзитный трафик через нее не пойдёт.
+UPDATE: 19.09.2023
+ теперь явно зафильтруем префиксы, которые отдаём наружу,в провайдер "Триада".
+На R18:
+```
+ip prefix-list outTriada permit 192.168.42.0/24
+ip prefix-list outTriada permit 10.20.42.0/24
+```
+А также применим этот prefix-list на соседей:
+```
+neighbor 172.16.0.21 prefix-list outTriada out
+neighbor 172.16.0.25 prefix-list outTriada out
+```
+Готово. Теперь наружу кроме явно указанных двух сеток больше ничего не уйдёт.
 
 #### Настроика провайдера Киторн так, чтобы в офис Москва отдавался только маршрут по умолчанию.
 Исходные данные: Изначально мы получаем от Киторна вот такие маршруты:
@@ -155,6 +168,17 @@ RPKI validation codes: V valid, I invalid, N Not found
 
 ```
 Готово. Задача выполнена.
+UPDATE: 19.09.2023. Переделаю механизм анонса маршрута по умолчанию на neighbor ... default-originate
+На R22:
+```
+no ip route 0.0.0.0 0.0.0.0 Null 0
+
+router bgp 101
+no network 0.0.0.0 mask 0.0.0.0
+ neighbor 172.16.0.1 default-originate
+
+```
+Готово. Задача выполнена.
 
 ####  Настроика провайдера Ламас так, чтобы в офис Москва отдавался только маршрут по умолчанию и префикс офиса С.-Петербург
 
@@ -166,7 +190,7 @@ RPKI validation codes: V valid, I invalid, N Not found
 
 На R21:
 ```
-ip as-path access-list 2 permit 2042
+ip as-path access-list 2 permit _2042$
 
 ip prefix-list 1 seq 5 permit 0.0.0.0/0
 ```
