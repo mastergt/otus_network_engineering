@@ -1,0 +1,31 @@
+#R12
+enable
+conf ter
+
+ip prefix-list out permit 1.0.0.0/8
+ip prefix-list out permit 3.0.0.0/24
+ip prefix-list out permit 2.0.0.0/8
+ip prefix-list out permit 1.0.1.0/24
+
+router bgp 100 
+
+neighbor 3.0.0.2 prefix-list out  out
+neighbor 3.0.0.6 prefix-list out  out
+
+#R21
+enable
+conf ter
+
+ip prefix-list drop-local seq 5 deny 10.0.0.0/8 le 31
+ip prefix-list drop-local seq 10 permit 0.0.0.0/0 le 32
+
+ip as-path access-list 1 permit 65000
+ip as-path access-list 1 permit 100
+
+
+router bgp 100
+ neighbor 8.8.8.8 prefix-list drop-local out
+ neighbor 8.8.8.8 filter-list 1 out
+
+
+

@@ -1,0 +1,87 @@
+#R76
+enable
+conf ter
+router ospf 1
+network 10.0.0.9 0.0.0.3 area 0
+network 10.0.0.13 0.0.0.3 area 0
+network 10.0.0.21 0.0.0.3 area 0
+network 10.0.1.76 0.0.0.0 area 0
+
+#R88
+enable
+conf ter
+router ospf 1
+network 10.0.0.14 0.0.0.3 area 0
+network 10.0.0.26 0.0.0.3 area 0
+network 10.0.0.29 0.0.0.3 area 0
+network 10.0.1.88 0.0.0.0 area 0
+default-information originate
+
+#R80
+enable
+conf ter
+router ospf 1
+network 10.0.0.10 0.0.0.3 area 0
+network 10.0.0.25 0.0.0.3 area 0
+network 10.0.0.17 0.0.0.3 area 0
+network 10.0.1.80 0.0.0.0 area 0
+network 10.0.0.1 0.0.0.0 area 0
+
+
+#R77
+enable
+conf ter
+router ospf 1
+network 10.0.0.18 0.0.0.3 area 0
+network 10.0.0.30 0.0.0.3 area 0
+network 10.0.0.22 0.0.0.3 area 0
+network 10.0.1.77 0.0.0.0 area 0
+network 10.0.0.5 0.0.0.0 area 0
+default-information originate
+
+#NAS1 
+
+enable 
+conf ter
+router ospf 1
+network 10.0.0.2 0.0.0.3 area 0
+network 1.0.0.0 0.0.0.255 area 0
+
+
+#NAS2 
+
+enable 
+conf ter
+router ospf 1
+network 10.0.0.6 0.0.0.3 area 0
+network 1.0.1.0 0.0.0.255 area 0
+
+### ROSTOV
+
+#R11
+enable 
+conf ter
+router ospf 1
+network 10.0.2.1 0.0.0.3 area 0
+network 10.0.3.1 0.0.0.0 area 0
+network 10.0.2.13 0.0.0.3 area 0
+redistribute bgp 100
+
+#R12
+enable 
+conf ter
+router ospf 1
+network 10.0.2.5 0.0.0.3 area 0
+network 10.0.2.2 0.0.0.3 area 0
+network 10.0.3.2 0.0.0.0 area 0
+redistribute bgp 100
+
+#NAS3
+enable 
+conf ter
+router ospf 1
+network 10.0.2.14 0.0.0.3 area 0
+network 10.0.2.6 0.0.0.3 area 0
+network 10.0.3.3 0.0.0.0 area 0
+
+

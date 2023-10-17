@@ -1,0 +1,131 @@
+#R88
+enable 
+conf ter
+router bgp 65000
+neighbor 2.0.0.2 remote-as 100
+neighbor 10.0.1.77  remote-as 65000
+neighbor 10.0.1.77 update-source Loopback0
+neighbor 10.0.1.77 next-hop-self
+network 1.0.0.0 mask 255.255.255.0
+network 1.0.1.0 mask 255.255.255.0
+network 2.0.0.0 mask 255.255.255.252
+redistribute static
+exit
+
+ip route 10.0.0.0 255.255.255.0 null 0
+ip route 10.0.1.0 255.255.255.0 null 0
+ip route 2.0.0.0 255.255.255.0 null 0
+
+
+
+
+#R77
+enable 
+conf ter
+router bgp 65000
+neighbor 10.0.1.88 remote-as 65000
+neighbor 10.0.1.88 update-source Loopback0
+neighbor 10.0.1.88 next-hop-self
+neighbor 2.0.0.6 remote-as 100
+network 1.0.0.0 mask 255.255.255.0
+network 1.0.1.0 mask 255.255.255.0
+network 2.0.0.4 mask 255.255.255.252
+redistribute static
+exit
+
+ip route 10.0.0.0 255.255.255.0 null 0
+ip route 10.0.1.0 255.255.255.0 null 0
+ip route 2.0.0.0 255.255.255.0 null 0
+
+## ROSTOV
+
+#R11
+enable
+conf ter
+router bgp 100
+neighbor 2.0.0.1 remote-as 65000
+neighbor RR-client peer-group
+neighbor RR-client remote-as 100
+neighbor RR-client update-source Loopback0
+neighbor RR-client route-reflector-client
+neighbor RR-client next-hop-self
+neighbor 10.0.3.2 peer-group RR-client
+neighbor 10.0.3.3 peer-group RR-client
+neighbor 2.0.0.10 remote-as 100
+neighbor 2.0.0.10 next-hop-self
+network 2.0.0.8 mask 255.255.255.252
+network 10.0.3.0 mask 255.255.255.0
+network 10.0.2.0 mask 255.255.255.0
+
+exit
+ip route 10.0.2.0 255.255.255.0 null 0
+ip route 10.0.3.0 255.255.255.0 null 0
+
+
+#R12
+enable
+conf ter
+router bgp 100
+neighbor 2.0.0.5 remote-as 65000
+neighbor 10.0.3.1 remote-as 100
+neighbor 10.0.3.1 update-source Loopback0
+neighbor 10.0.3.1 next-hop-self
+neighbor 3.0.0.2 remote-as 101
+neighbor 3.0.0.6 remote-as 102
+
+network 1.0.0.0 mask 255.255.255.0
+network 1.0.1.0 mask 255.255.255.0
+
+network 3.0.0.0 mask 255.255.255.0
+exit 
+
+ip route 3.0.0.0 255.255.255.0 null  0
+
+#NAS3
+enable
+conf ter
+router bgp 100
+neighbor 10.0.3.1 remote-as 100
+neighbor 10.0.3.1 update-source Loopback0
+neighbor 10.0.3.1 next-hop-self
+network 2.1.0.0 mask 255.255.255.0
+network 10.0.2.8 mask 255.255.255.252
+
+#RND-IX
+enable
+conf ter
+router bgp 101
+neighbor 3.0.0.1 remote-as 100
+
+
+#RETN
+enable
+conf ter
+router bgp 102
+neighbor 3.0.0.5 remote-as 100
+default-information originate
+
+## Moscow
+enable
+conf ter
+router bgp 100
+neighbor 2.0.0.9 remote-as 100
+neighbor 2.0.0.9 next-hop-self
+neighbor 4.4.4.4 remote-as 104
+neighbor 8.8.8.8 remote-as 105
+network 4.4.4.0 mask 255.255.255.240
+network 8.8.8.0 mask 255.255.255.240
+
+
+
+## mairu-peering
+enable
+conf ter
+router bgp 104
+neighbor 4.4.4.1 remote-as 100
+
+## google-peering
+enable
+conf ter
+router bgp 105
+neighbor 8.8.8.1 remote-as 100
