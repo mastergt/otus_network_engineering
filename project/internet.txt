@@ -9,6 +9,12 @@ dns-server 192.168.1.1
 exit
 ip dhcp excluded-address 192.168.1.1
 
+ip dhcp pool users_white_ip
+network 2.2.0.0 255.255.255.0
+default-router 2.2.0.1
+dns-server 2.2.0.1
+exit
+ip dhcp excluded-address 2.2.0.1
 
 int loo 1
 ip add 1.0.0.1 255.255.255.0
@@ -99,6 +105,41 @@ exit
 
 access-list 1 permit 192.168.3.0 0.0.0.255
 ip nat pool nas3 2.1.0.1 2.1.0.8 netmask 255.255.255.0
+ip nat inside source list 1 pool nas3 overload
+
+
+#NAS4
+enable
+conf ter
+service dhcp
+ip dhcp pool users
+network 192.168.2.0 255.255.255.0
+default-router 192.168.2.1
+dns-server 192.168.2.1
+exit
+ip dhcp excluded-address 192.168.2.1
+
+
+int loo 1
+ip add 2.4.0.1 255.255.255.0
+ip add 2.4.0.2 255.255.255.0 secondary
+ip add 2.4.0.3 255.255.255.0 secondary
+ip add 2.4.0.4 255.255.255.0 secondary
+ip add 2.4.0.5 255.255.255.0 secondary
+ip add 2.4.0.6 255.255.255.0 secondary
+ip add 2.4.0.7 255.255.255.0 secondary
+ip add 2.4.0.8 255.255.255.0 secondary
+
+int eth 0/1.200 
+  ip nat inside
+int tun 0
+ip nat outside 
+int eth 0/2
+  ip nat outside
+exit 
+
+access-list 1 permit 192.168.2.0 0.0.0.255
+ip nat pool nas3 2.4.0.1 2.4.0.8 netmask 255.255.255.0
 ip nat inside source list 1 pool nas3 overload
 
 

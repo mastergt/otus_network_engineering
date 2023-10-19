@@ -6,6 +6,30 @@ network 10.0.0.9 0.0.0.3 area 0
 network 10.0.0.13 0.0.0.3 area 0
 network 10.0.0.21 0.0.0.3 area 0
 network 10.0.1.76 0.0.0.0 area 0
+network 10.0.0.42 0.0.0.3 area 0
+
+#iptv-cache1
+enable
+conf ter
+router ospf 1
+network 10.0.0.42 0.0.0.3 area 0
+network 10.0.0.45 0.0.0.3 area 0
+network 2.3.0.1 0.0.0.0 area 0
+
+#iptv-cache2
+enable
+conf ter
+router ospf 1
+network 10.0.2.18 0.0.0.3 area 1 
+network 2.3.0.1 0.0.0.0 area 1
+area 1 stub
+
+#iptv-cache1
+enable
+conf ter
+router ospf 1
+network 10.0.2.26 0.0.0.3 area 2
+network 2.3.0.1 0.0.0.0 area 2
 
 #R88
 enable
@@ -15,6 +39,7 @@ network 10.0.0.14 0.0.0.3 area 0
 network 10.0.0.26 0.0.0.3 area 0
 network 10.0.0.29 0.0.0.3 area 0
 network 10.0.1.88 0.0.0.0 area 0
+network 10.0.0.45 0.0.0.3 area 0
 default-information originate
 
 #R80
@@ -46,6 +71,7 @@ conf ter
 router ospf 1
 network 10.0.0.2 0.0.0.3 area 0
 network 1.0.0.0 0.0.0.255 area 0
+network 2.2.0.0 0.0.0.255 area 0
 
 
 #NAS2 
@@ -65,6 +91,7 @@ router ospf 1
 network 10.0.2.1 0.0.0.3 area 0
 network 10.0.3.1 0.0.0.0 area 0
 network 10.0.2.13 0.0.0.3 area 0
+network 10.0.2.17 0.0.0.3 area 1
 redistribute bgp 100
 
 #R12
@@ -83,5 +110,18 @@ router ospf 1
 network 10.0.2.14 0.0.0.3 area 0
 network 10.0.2.6 0.0.0.3 area 0
 network 10.0.3.3 0.0.0.0 area 0
+
+#NAS4
+enable 
+conf ter
+router ospf 1
+ router-id 10.0.2.22
+ network 10.0.2.20 0.0.0.3 area 2
+network 10.0.2.29 0.0.0.3 area 2
+network 10.0.2.25 0.0.0.3 area 2
+ network 10.0.3.4 0.0.0.0 area 2
+network 2.4.0.0 0.0.0.255 area 2
+
+
 
 

@@ -1,0 +1,60 @@
+#R12
+enable
+conf ter
+
+int tunnel 0
+ip add 10.0.2.21 255.255.255.252
+ip mtu 1400
+ip tcp adjust-mss 1360
+tunnel source 3.0.0.5
+tunnel destination 3.0.0.10
+
+crypto isakmp policy 1
+encr 3des
+hash md5
+authentication pre-share
+group 2
+lifetime 86400
+ 
+crypto isakmp key merionet address 1.1.1.10
+crypto ipsec transform-set TS esp-3des esp-md5-hmac
+mode transport
+
+crypto ipsec profile protect-gre
+set security-association lifetime seconds 86400
+set transform-set TS
+
+interface Tunnel 0
+tunnel protection ipsec profile protect-gre
+
+#NAS4
+enable
+conf ter
+
+int tunnel 0
+ip add 10.0.2.22 255.255.255.252
+ip mtu 1400
+ip tcp adjust-mss 1360
+tunnel source 3.0.0.10
+tunnel destination 3.0.0.5
+
+
+
+crypto isakmp policy 1
+encr 3des
+hash md5
+authentication pre-share
+group 2
+lifetime 86400
+
+crypto isakmp key merionet address 3.0.0.5
+crypto ipsec transform-set TS esp-3des esp-md5-hmac
+mode transport
+
+
+crypto ipsec profile protect-gre
+set security-association lifetime seconds 86400
+set transform-set TS
+
+interface Tunnel 0
+tunnel protection ipsec profile protect-gre
